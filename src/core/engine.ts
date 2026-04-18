@@ -1,4 +1,5 @@
 import { resolve } from 'node:path'
+import { createHash } from 'node:crypto'
 import type {
   RagConfig, LLMProvider, EmbeddingsProvider, VectorStore,
   Chunker, IngestOptions, QueryResult, Chunk,
@@ -70,8 +71,9 @@ export class RagEngine {
         documents = [loadFile(resolvedPath)]
       }
     } catch {
-      // Treat as raw text
-      documents = [{ content: pathOrText, filePath: 'inline' }]
+      // Treat as raw text — use content hash for unique chunk IDs
+      const hash = createHash('md5').update(pathOrText).digest('hex').slice(0, 8)
+      documents = [{ content: pathOrText, filePath: `inline_${hash}` }]
     }
 
     let totalChunks = 0

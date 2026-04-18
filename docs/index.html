@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rag-engine — Agentic RAG Framework for Node.js</title>
+  <meta name="description" content="Zero-dependency Agentic RAG framework for Node.js. Auto-retries with better queries, full decision trace, TypeScript-first. npm install rag-engine">
+  <meta name="keywords" content="rag, agentic rag, retrieval augmented generation, nodejs, typescript, openai, ollama, vector search, embeddings, llm, ai">
+  <meta name="author" content="Vitalii Semianchuk">
+  <meta property="og:title" content="rag-engine — Agentic RAG for Node.js">
+  <meta property="og:description" content="Zero-dependency Agentic RAG framework. Auto-retries, query rewriting, full decision trace. 5 lines to working RAG.">
+  <meta property="og:url" content="https://fix2015.github.io/rag-engine">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <button class="hamburger" aria-label="Menu">&#9776;</button>
+  <a href="#" class="header-brand"><span>rag</span>-engine</a>
+  <div class="header-links">
+    <span class="badge">v0.3.0</span>
+    <a href="https://github.com/fix2015/rag-engine" target="_blank">GitHub</a>
+    <a href="https://www.npmjs.com/package/rag-engine" target="_blank">npm</a>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay"></div>
+<nav class="sidebar">
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Getting Started</div>
+    <a href="#overview">Overview</a>
+    <a href="#installation">Installation</a>
+    <a href="#quickstart">Quick Start</a>
+    <a href="#cli">CLI Usage</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">How It Works</div>
+    <a href="#pipeline">Agentic Pipeline</a>
+    <a href="#decisions">Agent Decisions</a>
+    <a href="#trace">Decision Trace</a>
+    <a href="#pseudocode">Agent Loop Code</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">API Reference</div>
+    <a href="#api-engine">RagEngine</a>
+    <a href="#api-config">RagConfig</a>
+    <a href="#api-result">QueryResult</a>
+    <a href="#api-trace">TraceEntry</a>
+    <a href="#api-providers">LLM / Embeddings</a>
+    <a href="#api-store">VectorStore</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Examples</div>
+    <a href="#ex-quickstart">Quickstart</a>
+    <a href="#ex-codebase">Chat with Codebase</a>
+    <a href="#ex-ollama">Free Local RAG</a>
+    <a href="#ex-express">Express.js API</a>
+    <a href="#ex-nextjs">Next.js Route</a>
+    <a href="#ex-support">Support Bot</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">More</div>
+    <a href="#providers">Providers</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>rag-engine</h1>
+  <p class="subtitle">Agentic RAG Framework for Node.js<br>Zero dependencies. Auto-retries. Full decision trace.</p>
+  <div class="install-cmd"><code>npm install rag-engine</code></div>
+  <div class="hero-buttons">
+    <a href="#quickstart" class="btn btn-primary">Get Started</a>
+    <a href="https://github.com/fix2015/rag-engine" target="_blank" class="btn btn-outline">GitHub</a>
+    <a href="https://www.npmjs.com/package/rag-engine" target="_blank" class="btn btn-outline">npm</a>
+  </div>
+  <p class="meta">v0.3.0 <span>&middot;</span> 0 dependencies <span>&middot;</span> MIT License <span>&middot;</span> Node 18+</p>
+</div>
+
+<div class="content">
+
+<!-- Feature cards -->
+<div class="features">
+  <div class="feature-card">
+    <h3>Agentic, Not Basic</h3>
+    <p>Basic RAG returns garbage when retrieval fails. rag-engine retries with better queries, rewrites using document vocabulary, and admits when it doesn't know.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Zero Dependencies</h3>
+    <p>Core runs with just Node.js. No axios, no langchain, no bloat. Native fetch() for API calls, in-memory vector store with cosine similarity.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Full Transparency</h3>
+    <p>Every query returns a decision trace showing exactly what the agent did — search, evaluate, rewrite, synthesize. Debug your RAG in seconds.</p>
+  </div>
+</div>
+
+<!-- Getting Started -->
+<section id="overview">
+  <h1>Getting Started</h1>
+  <h2>Overview</h2>
+  <p>rag-engine is an Agentic RAG (Retrieval-Augmented Generation) framework for Node.js. Unlike basic RAG which blindly returns whatever chunks the vector search finds, rag-engine adds an intelligent agent loop that evaluates whether the retrieved chunks actually answer the question — and retries with better queries when they don't.</p>
+  <ul>
+    <li>5-line quickstart — import, create, ingest, query, done</li>
+    <li>Zero runtime dependencies for the core package</li>
+    <li>Agentic loop with relevance judge, query rewriting, and honest give-up</li>
+    <li>Full decision trace on every query for debugging</li>
+    <li>TypeScript-first with 20+ exported interfaces</li>
+    <li>CLI for quick prototyping</li>
+    <li>Auto-detects LLM provider from environment variables</li>
+  </ul>
+</section>
+
+<section id="installation">
+  <h2>Installation</h2>
+  <pre><code class="language-bash">npm install rag-engine</code></pre>
+  <p>Requires Node.js 18+ (for native fetch). Set your OpenAI API key:</p>
+  <pre><code class="language-bash">export OPENAI_API_KEY=sk-...</code></pre>
+  <p>Or create a <code>.env</code> file in your project root:</p>
+  <pre><code>OPENAI_API_KEY=sk-your-key-here</code></pre>
+</section>
+
+<section id="quickstart">
+  <h2>Quick Start (5 Lines)</h2>
+  <pre><code class="language-javascript">import { RagEngine } from 'rag-engine'
+
+const rag = await RagEngine.create()           // auto-detects OPENAI_API_KEY
+await rag.ingest('./docs')                     // loads, chunks, embeds, stores
+const result = await rag.query('How does auth work?')
+console.log(result.answer)                     // answer with citations
+console.log(result.sources)                    // relevant chunks with scores
+console.log(result.trace)                      // full agent decision log
+console.log(result.metrics)                    // timing and LLM call stats</code></pre>
+</section>
+
+<section id="cli">
+  <h2>CLI Usage</h2>
+  <pre><code class="language-bash"># Ingest files
+npx rag-engine ingest ./docs
+npx rag-engine ingest ./src --glob "**/*.ts"
+
+# Query (auto-ingests ./docs if present)
+npx rag-engine query "How does authentication work?"
+
+# Show index stats
+npx rag-engine stats</code></pre>
+  <p>The CLI reads <code>.env</code> files automatically. Note: CLI uses in-memory store, so documents are re-ingested on every run.</p>
+</section>
+
+<!-- How It Works -->
+<section id="pipeline">
+  <h1>How It Works</h1>
+  <h2>The Agentic Pipeline</h2>
+  <div class="flow">
+    <div class="flow-step">User Question</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step"><strong>1. RETRIEVAL</strong><br>Vector search &rarr; top-K chunks</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step highlight"><strong>2. RELEVANCE JUDGE</strong><br>LLM evaluates: "Do these chunks answer the question?"<br>Returns score (0-1) + decision</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step">Score &ge; 0.5 &rarr; <strong>SYNTHESIZE</strong> &rarr; Answer with citations</div>
+    <div class="flow-step">Score 0.2-0.5 &rarr; <strong>REWRITE</strong> &rarr; Better query, retry</div>
+    <div class="flow-step">Score &lt; 0.2 &rarr; <strong>GIVE UP</strong> &rarr; Honest "I don't know"</div>
+    <div class="flow-arrow">&darr;</div>
+    <div class="flow-step"><strong>RESPONSE</strong><br>{ answer, sources, trace, metrics }</div>
+  </div>
+  <p>Basic RAG retrieves chunks and sends them directly to an LLM. If the chunks are bad, the LLM confidently generates a wrong answer. Agentic RAG adds a judge step — and retries with better queries when retrieval fails.</p>
+</section>
+
+<section id="decisions">
+  <h2>Agent Decisions</h2>
+  <table>
+    <thead><tr><th>Decision</th><th>When</th><th>What Happens</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SYNTHESIZE</strong></td><td>Score &ge; 0.5</td><td>Chunks are good — generate answer with citations</td></tr>
+      <tr><td><strong>REWRITE</strong></td><td>Score 0.2–0.5</td><td>Chunks are related but off-topic — rewrite query using document vocabulary, retry</td></tr>
+      <tr><td><strong>BROADEN</strong></td><td>&lt; 3 results</td><td>Too few results — broaden the query, retry</td></tr>
+      <tr><td><strong>GIVE_UP</strong></td><td>Score &lt; 0.2 or max retries</td><td>Honestly say "I don't know"</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="trace">
+  <h2>Decision Trace</h2>
+  <p>Every query returns a full trace array showing exactly what the agent did:</p>
+  <pre><code class="language-javascript">result.trace = [
+  { action: "search", query: "How does auth work?", resultsCount: 5, attempt: 1 },
+  { action: "evaluate", score: 0.42, decision: "rewrite",
+    reasoning: "Chunks discuss authorization roles, not authentication flow" },
+  { action: "rewrite", newQuery: "user login JWT token session management" },
+  { action: "search", query: "user login JWT...", resultsCount: 8, attempt: 2 },
+  { action: "evaluate", score: 0.89, decision: "synthesize",
+    reasoning: "Chunks cover login flow, JWT creation, and session handling" },
+  { action: "synthesize", attempt: 2 }
+]</code></pre>
+  <p>When your RAG gives a bad answer, check <code>result.trace</code> and instantly see where it went wrong.</p>
+</section>
+
+<section id="pseudocode">
+  <h2>Agent Loop Pseudocode</h2>
+  <pre><code class="language-javascript">async function agentLoop(query, options) {
+  const trace = []
+  let currentQuery = query
+
+  for (let attempt = 1; attempt &lt;= options.maxRetries; attempt++) {
+    const chunks = await retriever.search(currentQuery, { topK: 10 })
+
+    const judgment = await llm.chatJSON({
+      system: 'Score 0-1, decide: synthesize|rewrite|broaden|give_up',
+      user: `Question: ${currentQuery}\nChunks:\n${formatChunks(chunks)}`
+    })
+
+    if (judgment.decision === 'synthesize') {
+      const answer = await llm.chat({
+        system: 'Answer using ONLY the provided chunks. Cite sources.',
+        user: `Question: ${query}\nChunks:\n${formatChunks(chunks)}`
+      })
+      return { answer, sources: chunks, trace }
+    }
+
+    if (judgment.decision === 'rewrite') {
+      currentQuery = judgment.rewrittenQuery
+      continue
+    }
+
+    if (judgment.decision === 'give_up') {
+      return { answer: "I don't know.", sources: [], trace }
+    }
+  }
+  return { answer: 'Could not find a confident answer.', sources: [], trace }
+}</code></pre>
+</section>
+
+<!-- API Reference -->
+<section id="api-engine">
+  <h1>API Reference</h1>
+  <div class="api-card">
+    <h3>RagEngine</h3>
+    <pre><code class="language-typescript">declare class RagEngine {
+  static create(config?: RagConfig): Promise&lt;RagEngine&gt;
+  ingest(pathOrText: string, options?: IngestOptions): Promise&lt;{ chunksAdded: number; filesProcessed: number }&gt;
+  query(question: string): Promise&lt;QueryResult&gt;
+  stats(): { chunks: number }
+  clear(): void
+}</code></pre>
+    <p><strong>create(config?)</strong> — Creates engine, auto-detects provider from env. Verifies embeddings before returning.</p>
+    <p><strong>ingest(pathOrText, options?)</strong> — Ingests a directory, file, or raw text string.</p>
+    <p><strong>query(question)</strong> — Runs the agentic loop. Returns answer + sources + trace + metrics.</p>
+  </div>
+</section>
+
+<section id="api-config">
+  <div class="api-card">
+    <h3>RagConfig</h3>
+    <pre><code class="language-typescript">interface RagConfig {
+  llm?: LLMConfig | LLMProvider         // default: OpenAI gpt-4o-mini
+  embeddings?: EmbeddingsConfig          // default: text-embedding-3-small
+  store?: VectorStore                    // default: in-memory
+  chunker?: ChunkerConfig | string       // default: sliding-window 512 tokens
+  agent?: AgentConfig                    // default: 3 retries, 0.5 threshold
+  retrieval?: RetrievalConfig            // default: topK 10
+}
+
+interface AgentConfig {
+  maxRetries?: number           // default: 3
+  relevanceThreshold?: number   // default: 0.5
+  systemPrompt?: string         // prepended to synthesis prompt
+}</code></pre>
+  </div>
+</section>
+
+<section id="api-result">
+  <div class="api-card">
+    <h3>QueryResult</h3>
+    <pre><code class="language-typescript">interface QueryResult {
+  answer: string           // generated answer with citations
+  sources: ScoredChunk[]   // chunks used, sorted by relevance
+  trace: TraceEntry[]      // full agent decision log
+  metrics: QueryMetrics    // timing and usage stats
+}
+
+interface QueryMetrics {
+  totalTimeMs: number
+  retrievalTimeMs: number
+  llmCalls: number
+  tokensUsed: number
+}</code></pre>
+  </div>
+</section>
+
+<section id="api-trace">
+  <div class="api-card">
+    <h3>TraceEntry</h3>
+    <pre><code class="language-typescript">interface TraceEntry {
+  action: 'search' | 'evaluate' | 'rewrite' | 'broaden' | 'synthesize' | 'give_up'
+  timestamp: number
+  query?: string
+  resultsCount?: number
+  attempt?: number
+  score?: number
+  decision?: string
+  reasoning?: string
+  newQuery?: string
+}</code></pre>
+  </div>
+</section>
+
+<section id="api-providers">
+  <div class="api-card">
+    <h3>LLMProvider / EmbeddingsProvider</h3>
+    <pre><code class="language-typescript">interface LLMProvider {
+  chat(messages: ChatMessage[], options?: LLMCallOptions): Promise&lt;string&gt;
+  chatJSON&lt;T&gt;(messages: ChatMessage[], options?: LLMCallOptions): Promise&lt;T&gt;
+}
+
+interface EmbeddingsProvider {
+  embed(texts: string[]): Promise&lt;number[][]&gt;
+  embedQuery(text: string): Promise&lt;number[]&gt;
+}</code></pre>
+    <p>Implement these interfaces to bring your own LLM or embeddings provider.</p>
+  </div>
+</section>
+
+<section id="api-store">
+  <div class="api-card">
+    <h3>VectorStore</h3>
+    <pre><code class="language-typescript">interface VectorStore {
+  add(chunks: Chunk[]): Promise&lt;void&gt;
+  search(embedding: number[], topK: number): Promise&lt;ScoredChunk[]&gt;
+  count(): number
+  clear(): void
+}</code></pre>
+  </div>
+</section>
+
+<!-- Examples -->
+<section id="ex-quickstart">
+  <h1>Examples</h1>
+  <h2>Quickstart (5 Lines)</h2>
+  <pre><code class="language-javascript">import { RagEngine } from 'rag-engine'
+
+const rag = await RagEngine.create()
+await rag.ingest('./docs')
+const result = await rag.query('How does auth work?')
+console.log(result.answer)</code></pre>
+</section>
+
+<section id="ex-codebase">
+  <h2>Chat with Your Codebase</h2>
+  <pre><code class="language-javascript">import { RagEngine } from 'rag-engine'
+
+const rag = await RagEngine.create()
+await rag.ingest('./src', { glob: '**/*.{ts,js}' })
+
+const result = await rag.query('Where is user authentication handled?')
+console.log(result.answer)
+console.log(result.sources)</code></pre>
+</section>
+
+<section id="ex-ollama">
+  <h2>Free Local RAG with Ollama</h2>
+  <p>100% free, 100% local. No API keys, no data leaves your machine.</p>
+  <pre><code class="language-javascript">import { RagEngine } from 'rag-engine'
+
+const rag = await RagEngine.create({
+  llm: { provider: 'ollama', model: 'llama3' },
+  embeddings: { provider: 'ollama', model: 'nomic-embed-text' },
+})
+
+await rag.ingest('./docs')
+const result = await rag.query('Explain the retry logic')</code></pre>
+</section>
+
+<section id="ex-express">
+  <h2>Express.js API</h2>
+  <pre><code class="language-javascript">import express from 'express'
+import { RagEngine } from 'rag-engine'
+
+const app = express()
+const rag = await RagEngine.create()
+await rag.ingest('./docs')
+
+app.use(express.json())
+app.post('/ask', async (req, res) => {
+  const result = await rag.query(req.body.question)
+  res.json(result)
+})
+app.listen(3000, () => console.log('RAG API on :3000'))</code></pre>
+</section>
+
+<section id="ex-nextjs">
+  <h2>Next.js API Route</h2>
+  <pre><code class="language-typescript">// app/api/chat/route.ts
+import { RagEngine } from 'rag-engine'
+import { NextRequest, NextResponse } from 'next/server'
+
+let rag: RagEngine
+
+async function getRag() {
+  if (!rag) {
+    rag = await RagEngine.create()
+    await rag.ingest('./docs')
+  }
+  return rag
+}
+
+export async function POST(req: NextRequest) {
+  const { question } = await req.json()
+  const engine = await getRag()
+  const result = await engine.query(question)
+  return NextResponse.json(result)
+}</code></pre>
+</section>
+
+<section id="ex-support">
+  <h2>Customer Support Bot</h2>
+  <pre><code class="language-javascript">import { RagEngine } from 'rag-engine'
+
+const rag = await RagEngine.create({
+  agent: {
+    systemPrompt: `You are a helpful customer support agent.
+      Always be polite. If you don't know, suggest contacting
+      support@company.com.`,
+    maxRetries: 2,
+  },
+})
+
+await rag.ingest('./knowledge-base')
+const result = await rag.query('How do I reset my password?')
+console.log(result.answer)</code></pre>
+</section>
+
+<!-- Providers -->
+<section id="providers">
+  <h1>Providers</h1>
+  <table>
+    <thead><tr><th>Provider</th><th>LLM Models</th><th>Embeddings</th><th>Cost</th><th>Setup</th></tr></thead>
+    <tbody>
+      <tr><td>OpenAI</td><td>gpt-4o, gpt-4o-mini</td><td>text-embedding-3-small</td><td>Paid</td><td><code>OPENAI_API_KEY</code></td></tr>
+      <tr><td>Anthropic</td><td>claude-sonnet, haiku</td><td>— (use OpenAI)</td><td>Paid</td><td><code>ANTHROPIC_API_KEY</code></td></tr>
+      <tr><td>Ollama</td><td>llama3, mistral, phi3</td><td>nomic-embed-text</td><td>FREE</td><td>Local install</td></tr>
+      <tr><td>Google</td><td>gemini-2.0-flash</td><td>text-embedding-004</td><td>Free tier</td><td><code>GOOGLE_API_KEY</code></td></tr>
+    </tbody>
+  </table>
+  <p>Auto-detection: if no provider is configured, rag-engine checks <code>OPENAI_API_KEY</code> from environment.</p>
+</section>
+
+<!-- Architecture -->
+<section id="architecture">
+  <h1>Architecture</h1>
+  <h2>Module Map</h2>
+  <pre><code>src/
+  core/engine.ts       RagEngine class — wires everything together
+  core/agent.ts        Agentic loop (retrieve → judge → decide → retry/answer)
+  llm/openai.ts        OpenAI LLM + embeddings via native fetch()
+  llm/prompts.ts       All agent prompts (judge, synthesizer)
+  stores/memory.ts     In-memory vector store (Map + cosine similarity)
+  ingest/loader.ts     File/directory loader with glob support
+  ingest/chunkers/     Sliding-window chunker (sentence-aware)</code></pre>
+
+  <h2>Design Decisions</h2>
+  <table>
+    <thead><tr><th>Decision</th><th>Choice</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Runtime deps</td><td>Zero</td><td>Differentiator vs LangChain (200+ deps)</td></tr>
+      <tr><td>HTTP</td><td>Native fetch()</td><td>Node 18+ built-in</td></tr>
+      <tr><td>Default store</td><td>In-memory</td><td>Works instantly, zero setup</td></tr>
+      <tr><td>Default LLM</td><td>Auto-detect</td><td>Zero config needed</td></tr>
+      <tr><td>Build</td><td>tsup</td><td>Fast ESM output with .d.ts</td></tr>
+      <tr><td>Tests</td><td>vitest</td><td>Fast native TypeScript</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Roadmap -->
+<section id="roadmap">
+  <h1>Roadmap</h1>
+
+  <div class="roadmap-phase done">
+    <h3>Phase 1 — MVP (v0.1.0–v0.3.0) &#10003;</h3>
+    <p>RagEngine.create() with auto-detect, agentic loop, in-memory store, OpenAI provider, sliding-window chunker, CLI, full TypeScript types. 4 bugs found and fixed through audit.</p>
+  </div>
+
+  <div class="roadmap-phase active">
+    <h3>Phase 2 — CLI + Providers</h3>
+    <p>Full CLI (init, serve), Ollama/Anthropic/Gemini providers, markdown + code chunkers, hybrid retrieval (vector + BM25).</p>
+  </div>
+
+  <div class="roadmap-phase">
+    <h3>Phase 3 — Evaluation + Plugins</h3>
+    <p>Built-in evaluation, plugin system, web-search fallback, SQLite store, example projects.</p>
+  </div>
+
+  <div class="roadmap-phase">
+    <h3>Phase 4 — External Stores + Polish</h3>
+    <p>Pinecone, Chroma, Qdrant stores, streaming responses, composable pipeline builder, full docs and tutorials.</p>
+  </div>
+</section>
+
+</div><!-- .content -->
+
+<!-- Footer -->
+<footer class="footer">
+  <p>rag-engine — Agentic RAG Framework for Node.js</p>
+  <p>Built by Vitalii Semianchuk</p>
+  <p>
+    <a href="https://github.com/fix2015/rag-engine">GitHub</a>
+    <a href="https://www.npmjs.com/package/rag-engine">npm</a>
+    <a href="https://github.com/fix2015/rag-engine/issues">Report Issue</a>
+  </p>
+  <p>MIT License</p>
+</footer>
+
+</div><!-- .main -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

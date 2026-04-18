@@ -1,0 +1,56 @@
+{
+  "name": "rag-engine",
+  "version": "0.1.0",
+  "description": "Agentic RAG framework for Node.js — zero dependencies, auto-retries, full decision trace",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "rag-engine": "bin/rag-engine.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./stores/*": "./dist/stores/*.js",
+    "./llm/*": "./dist/llm/*.js",
+    "./chunkers/*": "./dist/ingest/chunkers/*.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "rag",
+    "agentic",
+    "retrieval-augmented-generation",
+    "llm",
+    "ai",
+    "embeddings",
+    "vector-search",
+    "openai",
+    "ollama",
+    "zero-dependency"
+  ],
+  "author": "fix2015",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fix2015/rag-engine.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

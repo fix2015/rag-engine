@@ -80,11 +80,17 @@ export class RagEngine {
       const textChunks = this.chunker.chunk(doc.content, { file: doc.filePath })
       const chunks: Chunk[] = []
 
-      // Batch embed
       const texts = textChunks.map(c => c.content)
       if (texts.length === 0) continue
 
-      const allEmbeddings = await this.embeddings.embed(texts)
+      // Batch embed in groups of 100 to avoid API limits
+      const BATCH_SIZE = 100
+      const allEmbeddings: number[][] = []
+      for (let i = 0; i < texts.length; i += BATCH_SIZE) {
+        const batch = texts.slice(i, i + BATCH_SIZE)
+        const batchEmbeddings = await this.embeddings.embed(batch)
+        allEmbeddings.push(...batchEmbeddings)
+      }
 
       for (let i = 0; i < textChunks.length; i++) {
         chunks.push({

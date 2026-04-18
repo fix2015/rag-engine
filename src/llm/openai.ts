@@ -5,6 +5,7 @@ export class OpenAILLM implements LLMProvider {
   private model: string
   private baseUrl: string
   private temperature: number
+  public lastTokensUsed: number = 0
 
   constructor(options: { apiKey?: string; model?: string; baseUrl?: string; temperature?: number } = {}) {
     this.apiKey = options.apiKey || process.env.OPENAI_API_KEY || ''
@@ -46,6 +47,7 @@ export class OpenAILLM implements LLMProvider {
       usage?: { total_tokens: number }
     }
 
+    this.lastTokensUsed = data.usage?.total_tokens ?? 0
     return data.choices[0].message.content
   }
 

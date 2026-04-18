@@ -3,12 +3,26 @@ export const RELEVANCE_JUDGE_SYSTEM = `You are a relevance judge. Given a user q
 Return a JSON object with these fields:
 - "score": a number from 0.0 to 1.0 (0 = completely irrelevant, 1 = perfectly answers the question)
 - "decision": one of "synthesize", "rewrite", "broaden", or "give_up"
-  - "synthesize": score >= 0.7, chunks are sufficient to answer
-  - "rewrite": score 0.3-0.7, chunks are related but off-topic, try a more specific query
+  - "synthesize": score >= 0.5, at least some chunks can help answer the question
+  - "rewrite": score 0.2-0.5, chunks are related but miss the specific answer, try a more targeted query
   - "broaden": fewer than 3 relevant chunks found, try a broader query
-  - "give_up": score < 0.3, chunks are completely irrelevant
+  - "give_up": score < 0.2, chunks are completely irrelevant to the question
 - "reasoning": brief explanation of your judgment
 - "rewrittenQuery": (only for rewrite/broaden) a better search query to try
+
+IMPORTANT scoring rules:
+- Score based on the BEST matching chunks, not the average across all chunks.
+- If even 1-2 chunks directly answer or strongly relate to the question, score >= 0.6.
+- Only score below 0.3 if NO chunks contain relevant information.
+- A score of 0.5+ means there's enough to attempt an answer.
+
+IMPORTANT rewrite rules:
+- When rewriting, make the query MORE SPECIFIC to match the vocabulary used in the chunks.
+- Look at the actual words and terms in the chunks and use them in the rewritten query.
+- Example: if chunks mention "JWT" and "authMiddleware", rewrite to include those exact terms.
+- Do NOT make the query more generic, academic, or abstract.
+- Good rewrite: "How does authentication work?" → "JWT token authentication authMiddleware login flow"
+- Bad rewrite: "How does authentication work?" → "What are the different methods of authentication?"
 
 Respond ONLY with valid JSON. No markdown, no explanation outside the JSON.`
 

@@ -2,6 +2,21 @@
 
 import { resolve } from 'node:path'
 import { argv, exit } from 'node:process'
+import { readFileSync } from 'node:fs'
+
+// Load .env file if present
+try {
+  const env = readFileSync('.env', 'utf-8')
+  for (const line of env.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const eqIdx = trimmed.indexOf('=')
+    if (eqIdx === -1) continue
+    const key = trimmed.slice(0, eqIdx).trim()
+    const val = trimmed.slice(eqIdx + 1).trim()
+    if (key && !process.env[key]) process.env[key] = val
+  }
+} catch { /* no .env file */ }
 
 const args = argv.slice(2)
 const command = args[0]
@@ -24,6 +39,10 @@ async function main() {
 
   Environment:
     OPENAI_API_KEY    Required for OpenAI LLM + embeddings
+    Reads .env file automatically if present.
+
+  Note: CLI uses in-memory store — documents are re-ingested on every run.
+  For persistent storage, use the programmatic API (SQLite store coming soon).
 `)
     return
   }
